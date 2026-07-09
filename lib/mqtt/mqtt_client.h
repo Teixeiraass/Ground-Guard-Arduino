@@ -18,6 +18,7 @@ public:
 
 private:
     PubSubClient client;
+    String deviceUID;
 
     static MqttClient* instance;
 
@@ -25,6 +26,8 @@ private:
 
     static void callback(char* topic, byte* payload, unsigned int length);
     void publishAck(const String& commandId, const char* status);
+    void registerDevice();
+    void publishState(bool online, bool irrigating);
 };
 
 #endif
