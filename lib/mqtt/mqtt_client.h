@@ -19,6 +19,7 @@ public:
 private:
     PubSubClient client;
     String deviceUID;
+    unsigned long lastTelemetry = 0;
 
     static MqttClient* instance;
 
@@ -28,6 +29,7 @@ private:
     void publishAck(const String& commandId, const char* status);
     void registerDevice();
     void publishState(bool online, bool irrigating);
+    void publishTelemetry();
 };
 
 #endif

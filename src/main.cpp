@@ -16,6 +16,12 @@ void setup() {
 }
 
 void loop() {
+    int raw = analogRead(34);
+
+    Serial.print("ADC: ");
+    Serial.println(raw);
+
+    delay(1000);
 
     wifi.loop();
 
