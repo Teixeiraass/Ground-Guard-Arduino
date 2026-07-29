@@ -16,6 +16,7 @@ MqttClient::MqttClient(Client& wifiClient)
 
 void MqttClient::begin() {
     pinMode(LED_PIN, OUTPUT);
+    pinMode(34, INPUT);
 
     Preferences prefs;
 
@@ -44,7 +45,15 @@ void MqttClient::begin() {
 
 void MqttClient::loop() {
     reconnect();
+
     client.loop();
+
+    if (millis() - lastTelemetry >= 5000)
+    {
+        lastTelemetry = millis();
+
+        publishTelemetry();
+    }
 }
 
 void MqttClient::reconnect() {
@@ -193,5 +202,27 @@ void MqttClient::publishState(bool online, bool irrigating)
     client.publish(topic.c_str(), payload.c_str(), true);
 
     Serial.print("State enviado: ");
+    Serial.println(payload);
+}
+
+#include "soil_sensor.h"
+
+void MqttClient::publishTelemetry()
+{
+    JsonDocument doc;
+    
+    doc["soil_moisture"] = SoilSensor::readPercentage();
+
+    doc["ip_address"] = WiFi.localIP().toString();
+    doc["wifi_ssid"] = WiFi.SSID();
+
+    String payload;
+    serializeJson(doc, payload);
+
+    String topic = "ground-guard/devices/" + deviceUID + "/telemetry";
+
+    client.publish(topic.c_str(), payload.c_str());
+
+    Serial.print("Telemetry enviada: ");
     Serial.println(payload);
 }
