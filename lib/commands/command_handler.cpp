@@ -11,7 +11,8 @@ CommandResponse CommandHandler::handle(const String& topic, const String& payloa
     deserializeJson(doc, payload);
 
     CommandResponse res;
-    res.commandId = doc["commandId"].as<String>();
+    // The API sends "command_id"; "commandId" kept for older payloads.
+    res.commandId = doc["command_id"] | doc["commandId"] | "";
 
     String action = doc["action"];
 

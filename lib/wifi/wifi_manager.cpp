@@ -1,8 +1,10 @@
 #include "wifi_manager.h"
 #include <WiFi.h>
+#include <config.h>
 
-const char* SSID = "janny";
-const char* PASSWORD = "re70488705";
+// Credentials come from include/config.h, which is not versioned.
+const char* SSID = WIFI_SSID;
+const char* PASSWORD = WIFI_PASSWORD;
 
 void WifiManager::begin() {
 
