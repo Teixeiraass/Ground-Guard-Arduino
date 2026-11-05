@@ -3,3 +3,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# Local credentials (Wi-Fi, broker). Template: include/config.h.example
+include/config.h
+.DS_Store

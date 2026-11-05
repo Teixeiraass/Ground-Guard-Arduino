@@ -39,7 +39,7 @@ void MqttClient::begin() {
 
     registerDevice();
 
-    client.setServer("192.168.15.15", 1883);
+    client.setServer("192.168.15.3", 1883);
     client.setCallback(callback);
 }
 
@@ -67,8 +67,9 @@ void MqttClient::reconnect() {
 
     const char* willPayload = "{\"online\":false}";
 
+    // Unique per device: a shared client id makes sensors kick each other off the broker.
     if (client.connect(
-        "ground-guard",
+        deviceUID.c_str(),
         nullptr,
         nullptr,
         willTopic.c_str(),
@@ -156,7 +157,7 @@ void MqttClient::registerDevice()
 {
     HTTPClient http;
 
-    http.begin("http://192.168.15.15:8080/api/v1/devices/register");
+    http.begin("http://192.168.15.3:8080/api/v1/devices/register");
     http.addHeader("Content-Type", "application/json");
 
     String deviceName = "ground_guard_" + deviceUID;
@@ -210,8 +211,17 @@ void MqttClient::publishState(bool online, bool irrigating)
 void MqttClient::publishTelemetry()
 {
     JsonDocument doc;
-    
-    doc["soil_moisture"] = SoilSensor::readPercentage();
+
+    SoilReading soil = SoilSensor::read();
+
+    // A faulty probe sends no soil_moisture, so the API keeps the last
+    // good value instead of recording a fake 0% or 100%.
+    if (soil.ok) {
+        doc["soil_moisture"] = soil.percentage;
+    }
+    doc["soil_raw"] = soil.raw;
+    doc["sensor_ok"] = soil.ok;
+    doc["rssi"] = WiFi.RSSI();
 
     doc["ip_address"] = WiFi.localIP().toString();
     doc["wifi_ssid"] = WiFi.SSID();
